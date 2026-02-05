@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind Battle 1v1</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif;}
+body {
+  min-height:100vh;
+  background: linear-gradient(135deg,#2c003e,#4b0066);
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding-bottom:3rem;
+}
+nav {
+  width:100%;
+  background: rgba(0,0,0,0.5);
+  padding:0.8rem 1.5rem;
+  display:flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top:0;
+  z-index:100;
+  flex-wrap:wrap;
+}
+nav .logo img {height:35px;}
+nav ul {
+  list-style:none;
+  display:flex;
+  gap:0.8rem;
+  flex-wrap:wrap;
+}
+nav a {
+  text-decoration:none;
+  color:#fff;
+  padding:0.5rem 0.9rem;
+  border-radius:5px;
+  transition:0.3s;
+  font-size:0.95rem;
+}
+nav a:hover {background: rgba(255,255,255,0.2);}
+.btn-login {border:1px solid #fff;}
+.btn-signup {background:#f1c40f;color:#000;font-weight:600;}
+.container {
+  margin-top:3rem;
+  width:90%;
+  max-width:600px;
+  text-align:center;
+}
+#setup, #matchInfo, #game {
+  background: rgba(0,0,0,0.65);
+  padding:2rem;
+  border-radius:15px;
+  margin-top:1.5rem;
+  box-shadow:0 0 20px rgba(0,0,0,0.5);
+}
+#setup p, #matchInfo p {margin:1rem 0; font-weight:500;}
+#setup button, #leaveBtn, #findBtn {
+  padding:0.7rem 1.5rem;
+  border:none;
+  border-radius:10px;
+  background: linear-gradient(90deg,#6a0dad,#9b59b6);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.3s;
+  margin-top:1rem;
+}
+#setup button:hover, #leaveBtn:hover, #findBtn:hover {transform: scale(1.05); box-shadow:0 0 10px #fff;}
+.question-box {margin-top:1rem;}
+#question {font-size:1.3rem; margin-bottom:1rem;}
+#options {display:flex; flex-direction:column; gap:1rem; margin-bottom:1rem;}
+.option {background: rgba(255,255,255,0.1); border:none; padding:0.7rem 1rem; border-radius:10px; cursor:pointer; transition:0.3s; color:#fff; font-size:1rem;}
+.option:hover {background: rgba(255,255,255,0.25); transform: scale(1.02);}
+#feedback {font-weight:600; min-height:24px; margin-bottom:1rem;}
+#answers div {margin:0.3rem 0; font-weight:500;}
+#status, #countdown {font-weight:bold; margin-bottom:1rem; color:gold;}
+#chatBox {margin-top:1.5rem; background: rgba(255,255,255,0.05); padding:1rem; border-radius:10px;}
+#chatMessages {height:150px; overflow-y:auto; background: rgba(0,0,0,0.3); padding:0.5rem; border-radius:10px; margin-bottom:0.5rem;}
+#chatControls {display:flex; gap:0.5rem;}
+#chatInput {flex:1; padding:0.5rem; border-radius:5px; border:none;}
+#emojiPanel {display:none; margin-top:0.5rem; display:flex; flex-wrap:wrap; gap:0.5rem;}
+#emojiPanel button {padding:0.3rem 0.5rem; border:none; border-radius:5px; cursor:pointer; background: rgba(255,255,255,0.2);}
+.bg-particles {position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; overflow:hidden;}
+.particle {position:absolute; border-radius:50%; background: rgba(255,255,255,0.15); animation: float linear infinite;}
+@keyframes float {0% {transform: translateY(0px) translateX(0px);} 50% {transform: translateY(-120px) translateX(15px);} 100% {transform: translateY(0px) translateX(0px);} }
+@media(max-width:480px){
+  nav {justify-content:center; gap:0.5rem;}
+  #setup, #matchInfo, #game {padding:1.5rem;}
+  #setup button, #leaveBtn, #findBtn, #options button {width:100%;}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-particles"></div>
+
+<nav>
+  <div class="logo"><img src="images/MindBattle.png" alt="Mind Battle Logo"></div>
+  <ul>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+<h1>Mind Battle 1v1</h1>
+
+<div id="setup">
+<p id="userInfo">You must be logged in to play.</p>
+<button id="findBtn" disabled>Signing in...</button>
+<p id="lobbyStatus"></p>
+</div>
+
+<div id="matchInfo" style="display:none;">
+<p id="matchState"></p>
+<p>Opponent: <span id="oppName">—</span></p>
+<p id="countdown"></p>
+<div id="game" class="question-box">
+  <div id="question"></div>
+  <div id="options"></div>
+  <div id="feedback"></div>
+  <div id="answers"></div>
+</div>
+<p id="final"></p>
+<button id="leaveBtn">Leave Match</button>
+
+<div id="chatBox">
+<div id="chatMessages"></div>
+<div id="chatControls">
+<input id="chatInput" type="text" placeholder="Type a message...">
+<button id="sendBtn">Send</button>
+<button id="emojiToggle">💬</button>
+</div>
+<div id="emojiPanel">
+<button>😀</button><button>😂</button><button>🔥</button>
+<button>😎</button><button>💯</button><button>🎉</button>
+<button>👍</button><button>😭</button><button>🤔</button>
+</div>
+</div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import { getDatabase, ref, set, push, onValue, onDisconnect, get, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import { getFirestore, doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js"
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+  authDomain: "mind-battle-32801.firebaseapp.com",
+  databaseURL: "https://mind-battle-32801-default-rtdb.europe-west1.firebasedatabase.app/",
+  projectId: "mind-battle-32801",
+  appId: "1:134995556582:web:1ed2267687a197f1b0e327"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+const firestore = getFirestore(app);
+
+// --- DOM ELEMENTS ---
+const findBtn = document.getElementById('findBtn');
+const lobbyStatus = document.getElementById('lobbyStatus');
+const matchInfo = document.getElementById('matchInfo');
+const matchState = document.getElementById('matchState');
+const oppName = document.getElementById('oppName');
+const countdownEl = document.getElementById('countdown');
+const gameDiv = document.getElementById('game');
+const qElem = document.getElementById('question');
+const optionsElem = document.getElementById('options');
+const feedbackElem = document.getElementById('feedback');
+const finalEl = document.getElementById('final');
+const leaveBtn = document.getElementById('leaveBtn');
+const answersDiv = document.getElementById('answers');
+const userInfo = document.getElementById('userInfo');
+
+const chatMessages = document.getElementById('chatMessages');
+const emojiToggle = document.getElementById('emojiToggle');
+const emojiPanel = document.getElementById('emojiPanel');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+
+let me = { uid:null, name:null, waitingKey:null };
+let matchId = null;
+let matchRef = null;
+let localMatch = null;
+let countdownTimer = null;
+const QUESTION_DURATION_MS = 10000;
+
+
+
+// ===== AUTH =====
+onAuthStateChanged(auth, user => {
+  if(!user){ userInfo.textContent="⚠️ You must be logged in to play."; findBtn.disabled=true; return; }
+  me.uid=user.uid;
+  me.name=user.displayName||user.email||("Player-"+me.uid.substring(0,6));
+  userInfo.textContent=`Logged in as: ${me.name}`;
+  findBtn.disabled=false;
+  findBtn.textContent="Find Match (1v1)";
+  findBtn.onclick=async()=>{ findBtn.disabled=true; lobbyStatus.textContent="Searching for opponent..."; await enterQueue(); };
+  listenForMatch();
+});
+
+async function listenForMatch(){
+  const snap = await get(ref(db, `playerMatch/${me.uid}`));
+  const matchKey = snap.val();
+  if(matchKey) subscribeToMatch(matchKey); 
+}
+
+async function enterQueue() {
+  const playerDoc = await getDoc(doc(firestore, "players", me.uid));
+  const elo = playerDoc.exists() ? playerDoc.data().elo || 1000 : 1000;
+  me.joinTime = Date.now();
+
+  me.waitingKey = crypto.randomUUID();
+  const myRef = ref(db, `waiting/${me.waitingKey}`);
+  await set(myRef, { uid: me.uid, name: me.name, elo, joinTime: me.joinTime, ts: serverTimestamp() });
+  onDisconnect(myRef).remove();
+
+  checkForOpponent();
+}
+
+onValue(ref(db,'waiting'), snap => {
+  const waiting = snap.val() || {};
+  lobbyStatus.textContent = `Waiting: ${Object.values(waiting).map(p=>p.name).join(', ')}`;
+  if(!localMatch && Object.keys(waiting).some(k=>waiting[k].uid!==me.uid)) checkForOpponent();
+});
+
+async function checkForOpponent() {
+  if (localMatch || !me.waitingKey) return;
+  const snap = await get(ref(db,'waiting'));
+  const waiting = snap.val() || {};
+  const myEntry = waiting[me.waitingKey];
+  if(!myEntry) return;
+
+  const now = Date.now();
+  const waitingTime = now - (myEntry.joinTime || now);
+  const baseMaxDiff = 200;
+  const maxDiff = baseMaxDiff + Math.floor(waitingTime / 1000);
+
+  const candidates = Object.keys(waiting).filter(k => k !== me.waitingKey);
+  let bestKey = null;
+  let minDiff = Infinity;
+
+  for(const k of candidates){
+    const diff = Math.abs(waiting[k].elo - myEntry.elo);
+    if(diff <= maxDiff && diff < minDiff){
+      minDiff = diff;
+      bestKey = k;
+    }
+  }
+  if(!bestKey) return;
+
+  const opponent = waiting[bestKey];
+  localMatch = true;
+
+  const avgElo = (myEntry.elo + opponent.elo)/2;
+  let difficulty;
+  if(avgElo < 900) difficulty = 'easy';
+  else if(avgElo < 1300) difficulty = 'medium';
+  else difficulty = 'hard';
+
+  const questionsRef = ref(db, 'matches/questionsTemp');
+  let questions = [];
+  if(me.uid < opponent.uid) {
+    questions = await loadQuestionsFromAPI(difficulty);
+    await set(questionsRef, questions);
+  } else {
+    let snapQ = await get(questionsRef);
+    let retries=0;
+    while (!snapQ.exists() && retries<20) {
+      await new Promise(res=>setTimeout(res,200));
+      snapQ = await get(questionsRef);
+      retries++;
+    }
+    if(!snapQ.exists()) location.reload();
+    questions = snapQ.val();
+  }
+
+  const matchKey = push(ref(db,'matches')).key;
+  const matchObj = {
+    id: matchKey,
+    players: [
+      { uid: me.uid, name: me.name, score: 0 },
+      { uid: opponent.uid, name: opponent.name, score: 0 }
+    ],
+    current: 0,
+    questions,
+    host: me.uid < opponent.uid ? me.uid : opponent.uid,
+    state: 'playing',
+    questionStart: serverTimestamp(),
+    difficulty
+  };
+
+  await set(ref(db, `matches/${matchKey}`), matchObj);
+  await set(ref(db, `waiting/${me.waitingKey}`), null);
+  await set(ref(db, `waiting/${bestKey}`), null);
+  await set(ref(db, `playerMatch/${me.uid}`), matchKey);
+  await set(ref(db, `playerMatch/${opponent.uid}`), matchKey);
+
+  if(me.uid < opponent.uid) await set(questionsRef, null);
+
+  subscribeToMatch(matchKey);
+}
+
+async function loadQuestionsFromAPI(difficulty='medium') {
+  const resp = await fetch(`https://opentdb.com/api.php?amount=10&type=multiple&difficulty=${difficulty}`);
+  if(!resp.ok) throw new Error('Failed to fetch questions');
+  const data = await resp.json();
+  return (data.results || []).map(item => {
+    const t = document.createElement('textarea'); t.innerHTML = item.question;
+    const qtext = t.value;
+    const opts = [...item.incorrect_answers];
+    const answerIndex = Math.floor(Math.random()*(opts.length+1));
+    opts.splice(answerIndex, 0, item.correct_answer);
+    return { q: qtext, options: opts, answer: answerIndex };
+  });
+}
+
+function subscribeToMatch(id){
+  matchId=id;
+  matchRef=ref(db,`matches/${id}`);
+  onValue(matchRef,snap=>{ localMatch=snap.val(); if(localMatch) renderMatch(); });
+  document.getElementById('setup').style.display='none';
+  matchInfo.style.display='block';
+  subscribeChat(id);
+}
+
+const chatHistory = new Set();
+
+function subscribeChat(id){
+  const chatRef = ref(db,`matches/${id}/chat`);
+  onValue(chatRef, snap => {
+    const msgs = snap.val() || {};
+    Object.entries(msgs).forEach(([key, m]) => {
+      if(chatHistory.has(key)) return; 
+      chatHistory.add(key);
+      const div = document.createElement("div");
+      div.textContent = `${m.from}: ${m.text}`;
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    });
+  });
+}
+
+
+emojiToggle.onclick = () => { emojiPanel.style.display = emojiPanel.style.display==="block"?"none":"block"; };
+emojiPanel.querySelectorAll("button").forEach(btn=>btn.onclick=()=>sendChat(btn.textContent));
+sendBtn.onclick=()=>{ const msg=chatInput.value.trim(); if(msg){ sendChat(msg); chatInput.value=""; } };
+function sendChat(text){ if(!matchId) return; const chatRef=ref(db,`matches/${matchId}/chat`); const newMsgRef=push(chatRef); set(newMsgRef,{from:me.name,text,at:Date.now()}); }
+
+function renderMatch(){
+  if(!localMatch) return;
+  const meIndex = localMatch.players.findIndex(p => p.uid===me.uid);
+  const opp = localMatch.players[1-meIndex];
+  if(!opp) return;
+
+  const questions = localMatch.questions || [];
+  const currentQ = questions[localMatch.current] || null;
+  oppName.textContent = opp.name;
+  matchState.textContent = `Match ${localMatch.id} | Q ${localMatch.current+1}/${questions.length}`;
+
+  if(localMatch.state==='finished'){
+    gameDiv.style.display='none';
+    const [p0,p1]=localMatch.players;
+    finalEl.textContent=`Game over — ${p0.name}: ${p0.score} | ${p1.name}: ${p1.score}`;
+    updatePlayerStats(p0,p1);
+    return;
+  }
+
+  if(!currentQ) return;
+
+  qElem.textContent = currentQ.q;
+  optionsElem.innerHTML='';
+  answersDiv.innerHTML='';
+  currentQ.options.forEach((opt,i)=>{
+    const btn = document.createElement('button');
+    btn.className='option';
+    btn.innerHTML = opt;
+    btn.onclick = ()=>submitAnswer(i);
+    btn.disabled = localMatch.answers?.[me.uid]?.[localMatch.current]!==undefined;
+    optionsElem.appendChild(btn);
+  });
+  feedbackElem.textContent='';
+  gameDiv.style.display='block';
+  startCountdown(localMatch.questionStart);
+  renderAnswers();
+}
+
+function startCountdown(startMs){
+  clearInterval(countdownTimer);
+
+  function tick(){
+    const startTime = Number(startMs);
+    if(isNaN(startTime)) return;
+    const elapsed = Date.now() - startTime;
+    const remain = Math.max(0, Math.ceil((QUESTION_DURATION_MS - elapsed)/1000));
+    countdownEl.textContent = `Time left: ${remain}s`;
+
+    if(elapsed >= QUESTION_DURATION_MS){
+      clearInterval(countdownTimer);
+      if(localMatch.host===me.uid){
+        const qIndex = localMatch.current;
+        const ansSnap = get(ref(db, `matches/${matchId}/answers`)).then(snap=>{
+          const ans = snap.val() || {};
+          const [p0,p1] = localMatch.players;
+          const a0 = ans[p0.uid]?.[qIndex]?.selected ?? null;
+          const a1 = ans[p1.uid]?.[qIndex]?.selected ?? null;
+          advanceQuestionIfNeeded(a0,a1);
+        });
+      }
+    }
+  }
+
+  tick();
+  countdownTimer=setInterval(tick,250);
+}
+
+
+
+async function submitAnswer(optionIndex){
+  if(!localMatch) return
+  const qIndex = localMatch.current
+
+  if(localMatch.answers?.[me.uid]?.[qIndex] !== undefined) return
+
+  const answersRef = ref(db, `matches/${matchId}/answers/${me.uid}/${qIndex}`)
+  await set(answersRef, { selected: optionIndex, at: serverTimestamp() })
+
+  const correct = localMatch.questions[qIndex].answer
+  feedbackElem.textContent = optionIndex === correct ? "✅ Correct!" : "❌ Wrong!"
+
+  if(localMatch.host===me.uid) await checkBothAnsweredAndAdvance()
+}
+
+
+async function checkBothAnsweredAndAdvance(){
+  if(!localMatch || localMatch.host !== me.uid) return;
+  const qIndex = localMatch.current;
+
+  if(localMatch.results?.[qIndex]) return;
+
+  const ansSnap = await get(ref(db, `matches/${matchId}/answers`));
+  const ans = ansSnap.val() || {};
+  const [p0,p1] = localMatch.players;
+
+  const a0 = ans[p0.uid]?.[qIndex]?.selected ?? null;
+  const a1 = ans[p1.uid]?.[qIndex]?.selected ?? null;
+
+  if(a0 === null || a1 === null) return;
+
+  await advanceQuestionIfNeeded(a0, a1);
+}
+
+
+function renderAnswers(){
+  if(!localMatch) return;
+  const qIndex = localMatch.current;
+  const ans = localMatch.answers || {};
+  const [p0,p1] = localMatch.players;
+  const qObj = localMatch.questions[qIndex];
+
+  answersDiv.innerHTML = '';
+  [p0,p1].forEach(p=>{
+    if(ans[p.uid]?.[qIndex]!==undefined && p.uid===me.uid){
+      const selected = ans[p.uid][qIndex].selected;
+      const isCorrect = selected === qObj.answer;
+      const div = document.createElement('div');
+      div.textContent = `You answered: ${qObj.options[selected]} ${isCorrect ? '✅' : '❌'}`;
+      answersDiv.appendChild(div);
+    }
+  });
+}
+
+leaveBtn.onclick=async()=>{
+  if(matchId) await update(ref(db,`matches/${matchId}`),{state:'finished'});
+  if(me.waitingKey) await set(ref(db, `waiting/${me.waitingKey}`), null);
+  await set(ref(db, `playerMatch/${me.uid}`), null);
+  localMatch=false;
+  location.reload();
+}
+
+async function advanceQuestionIfNeeded(a0, a1){
+  if(!localMatch || localMatch.host !== me.uid) return;
+
+  const qIndex = localMatch.current;
+  const [p0, p1] = localMatch.players;
+  const qObj = localMatch.questions[qIndex];
+  if(!qObj) return;
+
+  const correct = qObj.answer;
+
+  a0 = a0 !== undefined ? a0 : null;
+  a1 = a1 !== undefined ? a1 : null;
+
+  if(localMatch.results?.[qIndex]) return;
+
+  const updates = {};
+
+  if(a0 === correct) updates[`matches/${matchId}/players/0/score`] = (p0.score||0) + 1;
+  if(a1 === correct) updates[`matches/${matchId}/players/1/score`] = (p1.score||0) + 1;
+
+  updates[`matches/${matchId}/results/${qIndex}`] = { 
+    correct, 
+    a0, 
+    a1, 
+    resolvedAt: serverTimestamp() 
+  };
+
+  const nextIndex = localMatch.current + 1;
+  updates[`matches/${matchId}/current`] = nextIndex;
+
+  if(nextIndex >= localMatch.questions.length){
+    updates[`matches/${matchId}/state`] = 'finished';
+  } else {
+    updates[`matches/${matchId}/questionStart`] = serverTimestamp();
+  }
+
+  await update(ref(db), updates);
+}
+
+
+async function updatePlayerStats(p0, p1) {
+  const winner = p0.score > p1.score ? p0 : p1
+  const loser = p0.score > p1.score ? p1 : p0
+
+  const winnerRef = doc(firestore, "players", winner.uid)
+  const loserRef = doc(firestore, "players", loser.uid)
+
+  const wSnap = await getDoc(winnerRef)
+  const lSnap = await getDoc(loserRef)
+  if(!wSnap.exists() || !lSnap.exists()) return
+
+  const w = wSnap.data()
+  const l = lSnap.data()
+  const K = 30
+
+  const expectedW = 1 / (1 + 10 ** ((l.elo - w.elo) / 400))
+  const expectedL = 1 - expectedW
+
+  await updateDoc(winnerRef, {
+    elo: Math.round(w.elo + K * (1 - expectedW)),
+    wins: increment(1),
+    totalGames: increment(1),
+    winStreak: (w.winStreak || 0) + 1,
+    xp: (w.xp || 0) + 50
+  })
+
+  await updateDoc(loserRef, {
+    elo: Math.round(l.elo + K * (0 - expectedL)),
+    totalGames: increment(1),
+    winStreak: 0,
+    xp: (l.xp || 0) + 20
+  })
+
+  const totalQuestions = localMatch.questions.length
+
+  await addDoc(collection(firestore, "matches"), {
+    uid: me.uid,
+    mode: "1v1",
+    score: me.uid === p0.uid ? p0.score : p1.score,
+    total: totalQuestions,
+    streak: 0,
+    category: "General Knowledge",
+    difficulty: localMatch.difficulty,
+    date: serverTimestamp()
+  })
+}
+
+
+
+// ===== PARTICLE GENERATOR =====
+const bg = document.querySelector('.bg-particles');
+const NUM_PARTICLES = 150;
+for(let i=0;i<NUM_PARTICLES;i++){
+  const p = document.createElement('div');
+  p.className='particle';
+  const size=Math.random()*10+3;
+  const top=Math.random()*100;
+  const left=Math.random()*100;
+  const opacity=Math.random()*0.25+0.05;
+  const duration=Math.random()*20+10;
+  const delay=Math.random()*5;
+  p.style.width=`${size}px`;
+  p.style.height=`${size}px`;
+  p.style.top=`${top}%`;
+  p.style.left=`${left}%`;
+  p.style.opacity=opacity;
+  p.style.animationDuration=`${duration}s`;
+  p.style.animationDelay=`${delay}s`;
+  bg.appendChild(p);
+}
+</script>
+</body>
+</html>

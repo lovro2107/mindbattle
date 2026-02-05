@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind Battle - Streak Mode</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* {margin:0; padding:0; box-sizing:border-box; font-family:'Inter', sans-serif;}
+body {min-height:100vh; background: linear-gradient(135deg,#2c003e,#4b0066); color:#fff; display:flex; flex-direction:column; align-items:center; padding-bottom:3rem;}
+nav {width:100%; background: rgba(0,0,0,0.5); padding:0.8rem 1.5rem; display:flex; justify-content: space-between; align-items: center; position: sticky; top:0; z-index:100; flex-wrap:wrap;}
+nav .logo img {height:35px;}
+nav ul {list-style:none; display:flex; gap:0.8rem; flex-wrap:wrap;}
+nav a {text-decoration:none; color:#fff; padding:0.5rem 0.9rem; border-radius:5px; transition:0.3s; font-size:0.95rem;}
+nav a:hover {background: rgba(255,255,255,0.2);}
+#setup, #game {margin-top:3rem; background: rgba(0,0,0,0.65); padding:2rem; border-radius:15px; width:90%; max-width:480px; text-align:center; box-shadow:0 0 20px rgba(0,0,0,0.5);}
+#setup h2, #setup h1 {margin-bottom:1.2rem; font-size:1.7rem;}
+#setup label {display:block; margin:1rem 0; font-weight:500; text-align:left;}
+#setup select {width:100%; padding:0.6rem; border-radius:8px; border:none; margin-top:0.5rem; font-size:1rem; background: rgba(255,255,255,0.1); color:#fff; appearance: none;}
+#setup select option {color:#000; background:#fff;}
+#setup button, #retryBtn, #dashboardBtn {margin-top:1.5rem; padding:0.7rem 2rem; border:none; border-radius:10px; background: linear-gradient(90deg, #6a0dad, #9b59b6); font-weight:600; cursor:pointer; transition:0.3s; font-size:1rem; color:#fff;}
+#setup button:hover, #retryBtn:hover, #dashboardBtn:hover {transform: scale(1.05); box-shadow:0 0 10px #fff;}
+#game h1 {font-size:1.5rem; margin-bottom:1rem;}
+#options {display:flex; flex-direction:column; gap:1rem; margin:1rem 0;}
+.option-btn {background: rgba(255,255,255,0.1); border:none; padding:0.7rem 1rem; border-radius:10px; cursor:pointer; transition:0.3s; font-size:1rem; color:#fff;}
+.option-btn:hover {background: rgba(255,255,255,0.25); transform: scale(1.02);}
+#feedback {font-weight:600; min-height:24px; margin-bottom:1rem;}
+#nextBtn {padding:0.5rem 1.5rem; border:none; border-radius:8px; background:#6a0dad; color:#fff; cursor:pointer; transition:0.3s; font-size:1rem;}
+#nextBtn:hover {background:#4b0066;}
+#status {font-size: 1.2rem; font-weight: bold; margin-bottom: 15px; text-align: center; color: gold;}
+.bg-particles {position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; overflow:hidden;}
+.particle {position:absolute; width:10px; height:10px; background: rgba(255,255,255,0.15); border-radius:50%; animation: float 12s infinite;}
+@keyframes float {0% {transform: translateY(0);} 50% {transform: translateY(-100px);} 100% {transform: translateY(0);}}
+@media(max-width:480px){nav {justify-content:center; gap:0.5rem;} #setup, #game {padding:1.5rem;} #setup button, #nextBtn, #retryBtn, #dashboardBtn {width:100%;}}
+</style>
+</head>
+<body>
+
+<div class="bg-particles">
+  <div class="particle" style="top:10%; left:15%; animation-duration:14s;"></div>
+  <div class="particle" style="top:40%; left:70%; animation-duration:16s;"></div>
+  <div class="particle" style="top:80%; left:50%; animation-duration:18s;"></div>
+  <div class="particle" style="top:60%; left:10%; animation-duration:12s;"></div>
+  <div class="particle" style="top:30%; left:80%; animation-duration:20s;"></div>
+</div>
+
+<nav>
+  <div class="logo">
+    <img src="images/MindBattle.png" alt="Mind Battle Logo">
+  </div>
+  <ul>
+    <li><a href="index.html">Home</a></li>
+    <li><a href="dashboard.html">Dashboard</a></li>
+  </ul>
+</nav>
+
+<div id="setup">
+  <h1>🔥 Streak Mode Settings</h1>
+  <label>Category:
+    <select id="category"><option value="">Any</option></select>
+  </label>
+  <label>Difficulty:
+    <select id="difficulty">
+      <option value="">Any</option>
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+    </select>
+  </label>
+  <button id="startBtn">Start Streak</button>
+</div>
+
+<div id="game" style="display:none;">
+  <p id="status">Streak: 0</p>
+  <h1 id="question">Please select category & difficulty</h1>
+  <div id="options"></div>
+  <p id="feedback"></p>
+  <button id="nextBtn" style="display:none;">Next Question</button>
+  <div id="endButtons" style="display:none; margin-top:1rem;">
+    <button id="dashboardBtn">Go to Dashboard</button>
+    <button id="retryBtn">Try Again</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js"
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js"
+
+const firebaseConfig={
+  apiKey:"AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+  authDomain:"mind-battle-32801.firebaseapp.com",
+  projectId:"mind-battle-32801",
+  appId:"1:134995556582:web:1ed2267687a197f1b0e327"
+}
+
+const app=initializeApp(firebaseConfig)
+const auth=getAuth(app)
+const db=getFirestore(app)
+
+const qElem=document.getElementById("question")
+const optionsElem=document.getElementById("options")
+const feedbackElem=document.getElementById("feedback")
+const statusElem=document.getElementById("status")
+const nextBtn=document.getElementById("nextBtn")
+const retryBtn=document.getElementById("retryBtn")
+const dashboardBtn=document.getElementById("dashboardBtn")
+const endButtons=document.getElementById("endButtons")
+
+let me={uid:null,name:null}
+let questions=[]
+let current=0
+let streak=0
+let bestStreakSession=0
+let timer=null
+const QUESTION_TIME=20000
+
+onAuthStateChanged(auth,u=>{
+  if(!u){location.href="signin.html";return}
+  me.uid=u.uid
+  me.name=u.displayName||u.email
+})
+
+async function loadCategories(){
+  const r=await fetch("https://opentdb.com/api_category.php")
+  const d=await r.json()
+  const sel=document.getElementById("category")
+  d.trivia_categories.forEach(c=>{
+    const o=document.createElement("option")
+    o.value=c.id
+    o.textContent=c.name
+    sel.appendChild(o)
+  })
+}
+loadCategories()
+
+async function loadQuestions(diff,cat){
+  let url="https://opentdb.com/api.php?amount=10&type=multiple"
+  if(diff) url+=`&difficulty=${diff}`
+  if(cat) url+=`&category=${cat}`
+  const r=await fetch(url)
+  const d=await r.json()
+  questions=d.results.map(q=>{
+    const t=document.createElement("textarea")
+    t.innerHTML=q.question
+    const opts=[...q.incorrect_answers]
+    const idx=Math.floor(Math.random()*(opts.length+1))
+    opts.splice(idx,0,q.correct_answer)
+    return {q:t.value,options:opts,answer:idx}
+  })
+}
+
+document.getElementById("startBtn").onclick=async()=>{
+  await loadQuestions(
+    document.getElementById("difficulty").value,
+    document.getElementById("category").value
+  )
+  current=0
+  streak=0
+  bestStreakSession=0
+  document.getElementById("setup").style.display="none"
+  document.getElementById("game").style.display="block"
+  endButtons.style.display="none"
+  render()
+}
+
+function render(){
+  if(!questions[current]){endGame();return}
+  qElem.textContent=questions[current].q
+  optionsElem.innerHTML=""
+  feedbackElem.textContent=""
+  nextBtn.style.display="none"
+  statusElem.textContent=`Streak: ${streak}`
+  questions[current].options.forEach((o,i)=>{
+    const b=document.createElement("button")
+    b.className="option-btn"
+    b.textContent=o
+    b.onclick=()=>answer(i)
+    optionsElem.appendChild(b)
+  })
+  startTimer()
+}
+
+function startTimer(){
+  clearTimeout(timer)
+  timer=setTimeout(()=>{
+    lock()
+    nextBtn.style.display="block"
+  },QUESTION_TIME)
+}
+
+function answer(i){
+  clearTimeout(timer)
+  const q=questions[current]
+  if(i===q.answer){
+    streak++
+    if(streak>bestStreakSession) bestStreakSession=streak
+    feedbackElem.textContent="✅ Correct"
+  }else{
+    streak=0
+    feedbackElem.textContent="❌ Wrong"
+  }
+  statusElem.textContent=`Streak: ${streak}`
+  lock()
+  nextBtn.style.display="block"
+}
+
+function lock(){
+  [...optionsElem.children].forEach(b=>b.disabled=true)
+}
+
+nextBtn.onclick=()=>{
+  current++
+  render()
+}
+
+async function endGame(){
+  qElem.textContent="Game Over"
+  optionsElem.innerHTML=""
+  feedbackElem.textContent=""
+  nextBtn.style.display="none"
+  endButtons.style.display="block"
+
+  const ref=doc(db,"players",me.uid)
+  const snap=await getDoc(ref)
+  const data=snap.exists()?snap.data():{}
+  const prev=data.bestStreak||0
+
+  if(bestStreakSession>prev){
+    await setDoc(ref,{bestStreak:bestStreakSession},{merge:true})
+  }
+}
+
+retryBtn.onclick=()=>{
+  document.getElementById("setup").style.display="block"
+  document.getElementById("game").style.display="none"
+}
+
+dashboardBtn.onclick=()=>{
+  location.href="dashboard.html"
+}
+</script>
+
+</body>
+</html>

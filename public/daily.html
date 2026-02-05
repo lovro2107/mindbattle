@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Challenge</title>
+<link rel="stylesheet" href="stylesDAILY.css">
+<style>
+body {
+  font-family: 'Inter', sans-serif;
+  margin:0; padding:0;
+  overflow-x:hidden;
+}
+canvas#particles {
+  position: fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:-1;
+}
+nav {
+  display:flex; justify-content:space-between; align-items:center;
+  background: rgba(0,0,0,0.5);
+  padding: 1rem 2rem;
+  position: sticky;
+  top:0;
+  z-index:100;
+}
+nav .logo img { height:35px; }
+main {
+  padding:2rem;
+  max-width:480px;
+  margin:auto;
+  position: relative;
+  z-index:1;
+}
+button {
+  margin:0.5rem 0;
+  padding:0.7rem 1rem;
+  width:100%;
+  border:none;
+  border-radius:10px;
+  background: linear-gradient(90deg, #6a0dad, #9b59b6);
+  color:#fff;
+  font-weight:600;
+  cursor:pointer;
+  transition:0.3s;
+}
+button:hover { transform: scale(1.05); }
+#dailyGame { display:none; margin-top:1.5rem; }
+#dailyOptions button { margin-top:0.5rem; background: rgba(255,255,255,0.1); color:#fff; }
+#dailyOptions button:hover { background: rgba(255,255,255,0.25); }
+#dailyFeedback { font-weight:600; margin-top:0.5rem; min-height:20px; }
+#xpDisplay { font-weight:600; margin-top:0.5rem; text-align:center; }
+h2 { text-align:center; margin-bottom:1rem; }
+</style>
+</head>
+<body>
+
+<canvas id="particles"></canvas>
+
+<nav>
+  <div class="logo"><img src="images/MindBattle.png" alt="Mind Battle Logo"></div>
+  <a href="dashboard.html" style="background:gold; color:black; padding:0.5rem 1rem; border-radius:5px;">Back to Dashboard</a>
+</nav>
+
+<main>
+  <h2>Daily Challenge</h2>
+  <div id="xpDisplay">XP: 0</div>
+  <button id="startDailyBtn">Start Daily Challenge</button>
+
+  <div id="dailyGame">
+    <div id="dailyStatus"></div>
+    <h3 id="dailyQuestion"></h3>
+    <div id="dailyOptions"></div>
+    <div id="dailyFeedback"></div>
+    <button id="dailyNextBtn" style="display:none">Next</button>
+  </div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js"
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js"
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js"
+
+const app=initializeApp({
+  apiKey:"AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+  authDomain:"mind-battle-32801.firebaseapp.com",
+  projectId:"mind-battle-32801",
+  storageBucket:"mind-battle-32801.firebasestorage.app",
+  messagingSenderId:"134995556582",
+  appId:"1:134995556582:web:1ed2267687a197f1b0e327"
+})
+
+const db=getFirestore(app)
+const auth=getAuth(app)
+
+let questions=[]
+let current=0
+let score=0
+
+const startBtn=document.getElementById("startDailyBtn")
+const qElem=document.getElementById("dailyQuestion")
+const optionsElem=document.getElementById("dailyOptions")
+const feedbackElem=document.getElementById("dailyFeedback")
+const nextBtn=document.getElementById("dailyNextBtn")
+const gameDiv=document.getElementById("dailyGame")
+const xpDisplay=document.getElementById("xpDisplay")
+
+function today(){ const d=new Date(); return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}` }
+
+onAuthStateChanged(auth, async (user)=>{
+  if(!user){ window.location.href="signin.html"; return }
+  const playedRef=doc(db,"dailyPlayed",`${user.uid}_${today()}`)
+  if((await getDoc(playedRef)).exists()){
+    startBtn.disabled=true
+    startBtn.textContent="Daily Challenge Completed ✅"
+  }
+  const xpRef=doc(db,"xp",user.uid)
+  const xpSnap=await getDoc(xpRef)
+  xpDisplay.textContent=`XP: ${xpSnap.exists()?xpSnap.data().xp:0}`
+})
+
+async function loadQuestions(){
+  const u=auth.currentUser
+  if(!u) return
+  const playedRef=doc(db,"dailyPlayed",`${u.uid}_${today()}`)
+  if((await getDoc(playedRef)).exists()){ startBtn.disabled=true; startBtn.textContent="Daily Challenge Completed ✅"; return }
+
+  const res=await fetch("https://opentdb.com/api.php?amount=10&type=multiple")
+  const data=await res.json()
+  questions=data.results.map(q=>{
+    const opts=[...q.incorrect_answers]
+    const i=Math.floor(Math.random()*(opts.length+1))
+    opts.splice(i,0,q.correct_answer)
+    return {q:q.question,opts,ans:i}
+  })
+  current=0; score=0; gameDiv.style.display="block"; loadQuestion()
+}
+
+function loadQuestion(){
+  const q=questions[current]
+  qElem.innerHTML=q.q
+  optionsElem.innerHTML=""; feedbackElem.textContent=""; nextBtn.style.display="none"
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement("button")
+    b.innerHTML=o
+    b.onclick=()=>answer(i)
+    optionsElem.appendChild(b)
+  })
+}
+
+async function answer(i){
+  const u=auth.currentUser; if(!u) return
+  const alreadyAnswered = optionsElem.querySelectorAll("button[data-answered='true']").length
+  if(alreadyAnswered>0) return
+  optionsElem.querySelectorAll("button").forEach(b=>{ b.disabled=true; if(b.innerHTML===questions[current].opts[i]) b.dataset.answered='true' })
+  if(i===questions[current].ans) score++
+  feedbackElem.textContent=i===questions[current].ans?"✅ Correct":"❌ Wrong"
+  nextBtn.style.display="block"
+}
+
+nextBtn.onclick=async()=>{
+  current++
+  const u=auth.currentUser; if(!u) return
+  if(current<questions.length){ loadQuestion() }else{
+    const playedRef=doc(db,"dailyPlayed",`${u.uid}_${today()}`)
+    await setDoc(playedRef,{played:true})
+    startBtn.disabled=true; startBtn.textContent="Daily Challenge Completed ✅"
+
+    const xpRef=doc(db,"xp",u.uid)
+    const xpSnap=await getDoc(xpRef)
+    const xp=(xpSnap.exists()?xpSnap.data().xp:0)+(score*20)
+    await setDoc(xpRef,{xp})
+    xpDisplay.textContent=`XP: ${xp}`
+
+    const pRef=doc(db,"players",u.uid)
+    const pSnap=await getDoc(pRef)
+    const d=pSnap.exists()?pSnap.data():{}
+    const totalAnswered=(d.totalAnswered||0)+questions.length
+    const totalCorrect=(d.totalCorrect||0)+score
+    await setDoc(pRef,{
+      username:d.username||u.displayName||u.email.split("@")[0],
+      totalGames:(d.totalGames||0)+1,
+      totalAnswered,
+      totalCorrect,
+      accuracy:Math.round((totalCorrect/totalAnswered)*100)
+    },{merge:true})
+
+    qElem.textContent=`Daily complete! +${score*20} XP`
+    optionsElem.innerHTML=""; feedbackElem.textContent=""; nextBtn.style.display="none"
+  }
+}
+
+startBtn.onclick=()=>loadQuestions()
+
+// ===== PARTICLES =====
+const canvas = document.getElementById("particles")
+const ctx = canvas.getContext("2d")
+canvas.width = window.innerWidth; canvas.height = window.innerHeight
+window.addEventListener('resize', ()=>{ canvas.width=window.innerWidth; canvas.height=window.innerHeight })
+
+let particles = []
+for(let i=0;i<80;i++){
+  particles.push({
+    x: Math.random()*canvas.width,
+    y: Math.random()*canvas.height,
+    r: Math.random()*3+1,
+    dx: (Math.random()-0.5)*0.5,
+    dy: (Math.random()-0.5)*0.5
+  })
+}
+
+function drawParticles(){
+  ctx.clearRect(0,0,canvas.width,canvas.height)
+  ctx.fillStyle='rgba(255,255,255,0.15)'
+  particles.forEach(p=>{
+    ctx.beginPath()
+    ctx.arc(p.x,p.y,p.r,0,Math.PI*2)
+    ctx.fill()
+    p.x+=p.dx; p.y+=p.dy
+    if(p.x<0||p.x>canvas.width)p.dx*=-1
+    if(p.y<0||p.y>canvas.height)p.dy*=-1
+  })
+  requestAnimationFrame(drawParticles)
+}
+drawParticles()
+</script>
+
+</body>
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mind Battle - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="stylesDASHBOARD.css">
+</head>
+<body>
+
+<audio id="bgMusic" autoplay loop></audio>
+
+<div id="muteBtn" style="position:fixed;bottom:20px;right:20px;font-size:22px;cursor:pointer;z-index:999;">🔊</div>
+
+<script>
+  const sounds = ["background/1.mp3", "background/2.mp3", "background/3.mp3"]
+  const audio = document.getElementById("bgMusic")
+  const muteBtn = document.getElementById("muteBtn")
+
+  audio.src = sounds[Math.floor(Math.random() * sounds.length)]
+
+ audio.muted = false
+  localStorage.setItem("muted", "false")
+  muteBtn.textContent = "🔊"
+
+
+  audio.play().catch(() => {
+    document.body.addEventListener("click", () => audio.play(), { once: true })
+  })
+
+  muteBtn.onclick = () => {
+    audio.muted = !audio.muted
+    localStorage.setItem("muted", audio.muted)
+    muteBtn.textContent = audio.muted ? "🔇" : "🔊"
+  }
+</script>
+
+<div class="bg-particles">
+  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+  <div class="particle"></div><div class="particle"></div><div class="particle"></div>
+</div>
+
+<nav>
+  <div class="nav-container">
+    <div class="nav-left">
+      <div class="logo">
+        <img src="images/MindBattle.png" alt="Mind Battle Logo">
+      </div>
+      <ul class="nav-links-left">
+        <li><a href="index.html">Home</a></li>
+      </ul>
+    </div>
+    <ul class="nav-links-right">
+      <li><a href="signin.html" id="login-btn" class="btn-login">Login</a></li>
+      <li><a href="signup.html" id="signup-btn" class="btn-signup">Sign Up</a></li>
+      <li><span id="user-name" style="display:none;"></span></li>
+      <li><button id="logout-btn" style="display:none;">Logout</button></li>
+    </ul>
+  </div>
+</nav>
+
+<main class="dashboard">
+
+<section class="hero-stats">
+  <div class="stats-content">
+    <img id="playerAvatar" class="player-avatar" src="images/avatars/avatar1.png">
+    <div class="player-info">
+      <h1 class="welcome-text" id="username">Welcome back, Player123!</h1>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-label">Current Elo</div><div class="stat-value" id="elo">1,420</div></div>
+        <div class="stat-item"><div class="stat-label">Rank</div><div class="stat-value" id="rank">Gold III</div></div>
+        <div class="stat-item"><div class="stat-label">Win Rate</div><div class="stat-value" id="winRate">78%</div></div>
+        <div class="stat-item"><div class="stat-label">Total Games</div><div class="stat-value" id="totalGames">156</div></div>
+      </div>
+    </div>
+    <div class="xp-container">
+      <div class="level-badge" id="level">Level 12</div>
+      <div class="xp-bar-container"><div class="xp-bar-fill" id="xpFill"></div></div>
+      <div class="xp-text" id="xpText">2,340 / 3,600 XP</div>
+    </div>
+  </div>
+</section>
+
+<section class="action-cards">
+  <a href="multiplayer.html" class="action-card card-primary"><span class="card-icon">🎮</span><h3 class="card-title">Play Battle</h3><p class="card-description">Jump into intense 1v1 trivia battles against players worldwide</p></a>
+  <a href="daily.html" class="action-card card-secondary"><span class="card-icon">📅</span><h3 class="card-title">Daily Challenge</h3><p class="card-description">Complete today's special challenge for bonus XP and rewards</p></a>
+  <a href="practice.html" class="action-card"><span class="card-icon">🧩</span><h3 class="card-title">Practice Mode</h3><p class="card-description">Sharpen your skills with unlimited solo practice sessions</p></a>
+  <a href="streakmode.html" class="action-card"><span class="card-icon">🔥</span><h3 class="card-title">Streak Mode</h3><p class="card-description">Test your knowledge under pressure and see how long you can keep your winning streak alive!</p></a>
+  <a href="leaderboard.html" class="action-card"><span class="card-icon">🏆</span><h3 class="card-title">Leaderboard</h3><p class="card-description">See how you rank against the best players globally</p></a>
+  <a href="profile.html" class="action-card"><span class="card-icon">👤</span><h3 class="card-title">Profile</h3><p class="card-description">Customize your avatar and view your achievement progress</p></a>
+  <a href="messages.html" class="action-card"><span class="card-icon">📩</span><h3 class="card-title">Messages</h3><p class="card-description">Announcements and admin updates</p></a>
+  <a href="history.html" class="action-card"><span class="card-icon">📜</span><h3 class="card-title">Game History</h3><p class="card-description">View your game history!</p></a>
+  <a class="action-card disabled"><span class="card-icon">👥</span><h3 class="card-title">Friends</h3><p class="card-description">Challenge friends or make new connections in the arena</p></a>
+</section>
+
+<section class="quick-stats">
+  <div class="quick-stat">
+    <span class="quick-stat-icon">🔥</span>
+    <div class="quick-stat-value" id="winStreak">7</div>
+    <div class="quick-stat-label">Win Streak</div>
+  </div>
+
+  <div class="quick-stat">
+    <span class="quick-stat-icon">🎯</span>
+    <div class="quick-stat-value" id="accuracy">89%</div>
+    <div class="quick-stat-label">Accuracy</div>
+  </div>
+
+  <div class="quick-stat">
+    <span class="quick-stat-icon">🏆</span>
+    <div class="quick-stat-value" id="bestStreak">0</div>
+    <div class="quick-stat-label">Best Streak (Streak mode)</div>
+  </div>
+
+  <div class="quick-stat disabled">
+    <div class="overlay-text">Coming Soon</div>
+    <span class="quick-stat-icon">🏅</span>
+    <div class="quick-stat-value" id="achievements">0</div>
+    <div class="quick-stat-label">Achievements</div>
+  </div>
+</section>
+
+
+
+</main>
+
+<script type="module" src="dashboard.js"></script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js"
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js"
+
+const app = initializeApp({
+  apiKey: "AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+  authDomain: "mind-battle-32801.firebaseapp.com",
+  projectId: "mind-battle-32801",
+  storageBucket: "mind-battle-32801.firebasestorage.app",
+  messagingSenderId: "134995556582",
+  appId: "1:134995556582:web:1ed2267687a197f1b0e327"
+})
+
+const auth = getAuth(app)
+const loginBtn = document.getElementById("login-btn")
+const signupBtn = document.getElementById("signup-btn")
+const userNameSpan = document.getElementById("user-name")
+const logoutBtn = document.getElementById("logout-btn")
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginBtn.style.display = "none"
+    signupBtn.style.display = "none"
+    userNameSpan.style.display = "inline-block"
+    userNameSpan.textContent = user.displayName || user.email.split("@")[0]
+    logoutBtn.style.display = "inline-block"
+  } else {
+    loginBtn.style.display = "inline-block"
+    signupBtn.style.display = "inline-block"
+    userNameSpan.style.display = "none"
+    logoutBtn.style.display = "none"
+  }
+})
+
+logoutBtn.onclick = async () => {
+  await signOut(auth)
+  alert("Logged out successfully!")
+}
+</script>
+
+<audio id="hoverSound" src="sound/hover.mp3" preload="auto"></audio>
+
+<script>
+const hoverSound = document.getElementById("hoverSound")
+
+document.querySelectorAll("a, button, .action-card").forEach(el => {
+  el.addEventListener("mouseenter", () => {
+    hoverSound.currentTime = 0
+    hoverSound.play().catch(() => {})
+  })
+})
+</script>
+
+
+</body>
+</html>

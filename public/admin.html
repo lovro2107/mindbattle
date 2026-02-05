@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Announcements</title>
+
+</head>
+<body>
+  <main style="padding:20px; max-width:600px; margin:auto;">
+    <h1>Create Announcement</h1>
+    <form id="announcementForm">
+      <label>Title</label>
+      <input type="text" id="title" required style="width:100%; margin-bottom:10px;">
+
+      <label>Message</label>
+      <textarea id="message" rows="5" required style="width:100%; margin-bottom:10px;"></textarea>
+
+      <button type="submit">Send</button>
+    </form>
+    <p id="status"></p>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, serverTimestamp } 
+      from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+      authDomain: "mind-battle-32801.firebaseapp.com",
+      projectId: "mind-battle-32801",
+      storageBucket: "mind-battle-32801.firebasestorage.app",
+      messagingSenderId: "134995556582",
+      appId: "1:134995556582:web:1ed2267687a197f1b0e327",
+      measurementId: "G-RWWLR1E277"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const form = document.getElementById("announcementForm");
+    const status = document.getElementById("status");
+
+    let currentUser = null;
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+      } else {
+        status.textContent = "❌ You must be logged in to send announcements.";
+        form.querySelector("button").disabled = true;
+      }
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentUser) return;
+
+      const title = document.getElementById("title").value;
+      const message = document.getElementById("message").value;
+
+      try {
+        await addDoc(collection(db, "announcements"), {
+          title,
+          message,
+          sender: currentUser.displayName || currentUser.email || currentUser.uid,
+          timestamp: serverTimestamp(),
+          readBy: []
+        });
+        status.textContent = "✅ Announcement sent!";
+        form.reset();
+      } catch (err) {
+        status.textContent = "❌ Error: " + err.message;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mind Battle - Leaderboard</title>
+  <link rel="stylesheet" href="stylesLEADERBOARD.css">
+</head>
+<body>
+
+  <nav>
+    <div class="nav-container">
+      <div class="nav-left">
+        <div class="logo"><img src="images/MindBattle.png" alt="Mind Battle Logo"></div>
+        <ul class="nav-links-left">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+      </div>
+      <ul class="nav-links-right">
+        <li><a href="signin.html" id="login-btn">Login</a></li>
+        <li><a href="signup.html" id="signup-btn">Sign Up</a></li>
+        <li><span id="user-name" style="display:none;"></span></li>
+        <li><button id="logout-btn" style="display:none;">Logout</button></li>
+      </ul>
+    </div>
+  </nav>
+
+  <main class="leaderboard-container">
+    <h1>Leaderboard</h1>
+    <div class="filter-container">
+      <label>Filter: 
+        <select id="filter-select">
+          <option value="elo">Elo</option>
+          <option value="accuracy">Accuracy</option>
+          <option value="winRate">Win Rate</option>
+          <option value="totalGames">Total Games</option>
+        </select>
+      </label>
+    </div>
+    <table id="leaderboard-table">
+      <thead>
+        <tr id="table-headers">
+          <th>Rank</th>
+          <th>Player</th>
+          <th id="filter-header">Elo</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getFirestore, collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+      authDomain: "mind-battle-32801.firebaseapp.com",
+      projectId: "mind-battle-32801",
+      storageBucket: "mind-battle-32801.firebasestorage.app",
+      messagingSenderId: "134995556582",
+      appId: "1:134995556582:web:1ed2267687a197f1b0e327",
+      measurementId: "G-RWWLR1E277"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    const loginBtn = document.getElementById("login-btn");
+    const signupBtn = document.getElementById("signup-btn");
+    const userNameSpan = document.getElementById("user-name");
+    const logoutBtn = document.getElementById("logout-btn");
+    const leaderboardTable = document.querySelector("#leaderboard-table tbody");
+    const filterSelect = document.getElementById("filter-select");
+    const tableHeaders = document.getElementById("table-headers");
+    const filterHeader = document.getElementById("filter-header");
+
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        loginBtn.style.display = "none";
+        signupBtn.style.display = "none";
+        userNameSpan.style.display = "inline-block";
+        userNameSpan.textContent = user.displayName || user.email.split("@")[0];
+        logoutBtn.style.display = "inline-block";
+      } else {
+        loginBtn.style.display = "inline-block";
+        signupBtn.style.display = "inline-block";
+        userNameSpan.style.display = "none";
+        logoutBtn.style.display = "none";
+      }
+    });
+
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      alert("Logged out successfully!");
+      location.reload();
+    });
+
+    async function loadLeaderboard(filter="elo") {
+      leaderboardTable.innerHTML = "";
+
+      let playersQuery = collection(db, "players");
+      if (filter !== "all") {
+        playersQuery = query(playersQuery, orderBy(filter, "desc"));
+      }
+
+      const querySnapshot = await getDocs(playersQuery);
+      let rank = 1;
+
+      const headerMap = {
+        elo: "Elo",
+        accuracy: "Accuracy",
+        winRate: "Win Rate",
+        totalGames: "Total Games",
+        all: "Elo"
+      };
+
+      if (filter === "all") {
+        tableHeaders.innerHTML = `
+          <th>Rank</th>
+          <th>Player</th>
+          <th>Elo</th>
+          <th>Win Rate</th>
+          <th>Accuracy</th>
+          <th>Total Games</th>
+        `;
+      } else {
+        tableHeaders.innerHTML = `
+          <th>Rank</th>
+          <th>Player</th>
+          <th>${headerMap[filter]}</th>
+        `;
+      }
+
+      querySnapshot.forEach(docSnap => {
+        const player = docSnap.data();
+        const row = document.createElement("tr");
+
+        if (filter === "all") {
+          row.innerHTML = `
+            <td>${rank}</td>
+            <td>${player.username || docSnap.id}</td>
+            <td>${player.elo || 0}</td>
+            <td>${player.winRate || 0}%</td>
+            <td>${player.accuracy || 0}%</td>
+            <td>${player.totalGames || 0}</td>
+          `;
+        } else {
+          let valueCell = "—";
+          if (filter === "elo") valueCell = player.elo || 0;
+          if (filter === "accuracy") valueCell = (player.accuracy || 0) + "%";
+          if (filter === "winRate") valueCell = (player.winRate || 0) + "%";
+          if (filter === "totalGames") valueCell = player.totalGames || 0;
+
+          row.innerHTML = `
+            <td>${rank}</td>
+            <td>${player.username || docSnap.id}</td>
+            <td>${valueCell}</td>
+          `;
+        }
+
+        leaderboardTable.appendChild(row);
+        rank++;
+      });
+    }
+
+    filterSelect.addEventListener("change", () => loadLeaderboard(filterSelect.value));
+    loadLeaderboard();
+  </script>
+</body>
+</html>

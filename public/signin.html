@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mind Battle | Sign In</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav>
+    <div class="nav-container">
+      <div class="nav-left">
+        <div class="logo">
+          <img src="images/MindBattle.png" alt="Mind Battle Logo">
+        </div>
+        <ul class="nav-links-left">
+          <li><a href="index.html">Home</a></li>
+        </ul>
+      </div>
+      <ul class="nav-links-right">
+        <li><a href="signin.html" class="btn-login">Login</a></li>
+        <li><a href="signup.html" class="btn-signup">Sign Up</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <h1 style="text-align: center; padding: 40px 20px;">Sign In</h1>
+
+  <div class="form-container">
+    <form class="signup-form">
+      <label for="email">Email</label>
+      <input type="text" id="email" name="email" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit" class="btn-submit">Sign In</button>
+    </form>
+
+    <p class="redirect-text">
+      Don’t have an account? <a href="signup.html">Create one</a>
+    </p>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-analytics.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+      authDomain: "mind-battle-32801.firebaseapp.com",
+      projectId: "mind-battle-32801",
+      storageBucket: "mind-battle-32801.firebasestorage.app",
+      messagingSenderId: "134995556582",
+      appId: "1:134995556582:web:1ed2267687a197f1b0e327",
+      measurementId: "G-RWWLR1E277"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const auth = getAuth(app);
+
+    // Auto redirect to dashboard if logged in
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = "dashboard.html";
+      }
+    });
+
+
+    const form = document.querySelector(".signup-form");
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+
+      try {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        alert("Signed in successfully!");
+        window.location.href = "dashboard.html";
+      } catch (error) {
+        alert(error.message);
+      }
+    });
+  </script>
+</body>
+</html>

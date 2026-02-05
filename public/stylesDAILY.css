@@ -1,0 +1,201 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #3b1d5a, #120018);
+  color: #fff;
+}
+
+
+
+nav {
+  background: rgba(15,0,25,0.9);
+  padding: 12px 20px;
+  border-bottom: 1px solid rgba(180,120,255,0.25);
+}
+
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-left, .nav-links-right {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.nav-links-left li,
+.nav-links-right li {
+  list-style: none;
+}
+
+.nav-links-left a,
+.nav-links-right a {
+  text-decoration: none;
+  color: #e7d9ff;
+  font-weight: 600;
+}
+
+.nav-links-left a:hover,
+.nav-links-right a:hover {
+  color: #b985ff;
+}
+
+.logo img {
+  height: 40px;
+}
+
+
+
+#logout-btn {
+  background: linear-gradient(135deg, #8f5cff, #c77dff);
+  color: #120018;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+#logout-btn:hover {
+  filter: brightness(1.1);
+}
+
+
+
+h2 {
+  text-align: center;
+  margin-top: 30px;
+  margin-bottom: 16px;
+  color: #cfa6ff;
+  letter-spacing: 1px;
+}
+
+#dailyInfo,
+#xpDisplay {
+  text-align: center;
+  margin-bottom: 12px;
+  font-weight: 600;
+  color: #e7d9ff;
+}
+
+
+
+button {
+  background: linear-gradient(135deg, #8f5cff, #c77dff);
+  color: #120018;
+  padding: 12px;
+  border: none;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.25s;
+  width: 100%;
+}
+
+button:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+button:disabled {
+  background: #444;
+  cursor: not-allowed;
+}
+
+
+
+#dailyGame {
+  display: none;
+  max-width: 520px;
+  margin: 22px auto;
+  background: rgba(30,10,50,0.75);
+  border-radius: 18px;
+  padding: 18px;
+  border: 1px solid rgba(200,150,255,0.25);
+}
+
+#dailyStatus {
+  text-align: center;
+  font-weight: 700;
+  color: #ffd6ff;
+  margin-bottom: 10px;
+}
+
+#dailyQuestion {
+  text-align: center;
+  font-size: 1.25rem;
+  margin-bottom: 16px;
+  color: #ffd6ff;
+}
+
+
+
+#dailyOptions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+#dailyOptions button {
+  background: linear-gradient(135deg, #4b1f7a, #2a0d45);
+  color: #fff;
+  border: 1px solid rgba(200,150,255,0.25);
+}
+
+#dailyOptions button:hover {
+  background: linear-gradient(135deg, #a66cff, #e0b3ff);
+  color: #120018;
+}
+
+
+#dailyFeedback {
+  margin-top: 14px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.correct {
+  color: #9dffb0;
+}
+
+.wrong {
+  color: #ff9da6;
+}
+
+
+#dailyNextBtn {
+  margin-top: 14px;
+}
+
+
+@media (max-width: 600px) {
+
+  #dailyOptions {
+    grid-template-columns: 1fr;
+  }
+
+  #dailyGame {
+    margin: 18px 12px;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+  }
+}
+
+html, body {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+* {
+  max-width: 100%;
+}

@@ -1,0 +1,48 @@
+body {
+  font-family: 'Inter', sans-serif;
+  background: #121212;
+  color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+nav {
+  background: #1f1f1f;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+nav .logo img {
+  height: 40px;
+}
+
+nav .btn-back {
+  background: gold;
+  color: black;
+  padding: 6px 12px;
+  text-decoration: none;
+  border-radius: 5px;
+}
+
+main {
+  padding: 20px;
+}
+
+#history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.history-item {
+  background: #222;
+  padding: 12px 16px;
+  border-radius: 8px;
+}
+
+.history-item p {
+  margin: 2px 0;
+}

@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mind Battle</title>
+<link rel="icon" href="images/MindBattle.png" type="mindbat/png">
+<link rel="stylesheet" href="styles.css">
+<style>
+#preloader {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0,0,0,0.8);
+backdrop-filter: blur(5px);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 9999;
+}
+#preloader-logo {
+width: 200px;
+}
+#particles-canvas {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+pointer-events: none;
+}
+
+/* Mobile nav */
+@media (max-width: 768px) {
+  .nav-links-left,
+  .nav-links-right {
+    display: none;
+    flex-direction: column;
+    position: fixed;
+    top: 60px;
+    right: 0;
+    width: 200px;
+    background-color: #111;
+    padding: 20px;
+    border-radius: 0 0 0 10px;
+    z-index: 1000;
+  }
+
+  .nav-links-left.active,
+  .nav-links-right.active {
+    display: flex;
+  }
+
+  .nav-links-left li,
+  .nav-links-right li {
+    margin: 15px 0;
+  }
+
+  .nav-links-left a,
+  .nav-links-right a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+  }
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="preloader">
+<canvas id="particles-canvas"></canvas>
+</div>
+
+<nav>
+<div class="nav-container">
+<div class="nav-left">
+<div class="logo">
+<img src="images/MindBattle.png" alt="Mind Battle Logo">
+</div>
+<ul class="nav-links-left">
+<li><a href="#home">Home</a></li>
+<li><a href="#about">About</a></li>
+<li><a href="#features">Features</a></li>
+<li><a href="#Subjects">Categories</a></li>
+</ul>
+</div>
+<button class="nav-toggle">☰</button>
+<ul class="nav-links-right">
+<li><a href="#contact">Contact Us</a></li>
+<li id="login-btn"><a href="signin.html" class="btn-login">Login</a></li>
+<li id="signup-btn"><a href="signup.html" class="btn-signup">Sign Up</a></li>
+<li id="user-name" style="display:none; color:#00ff99; font-weight:bold;"></li>
+<li id="logout-btn" style="display:none;">
+<button style="background:none; border:none; color:#00ff99; font-weight:bold; cursor:pointer;">Logout</button>
+</li>
+</ul>
+</div>
+</nav>
+
+<section id="home">
+<div>
+<h1>Battle your brain.</h1>
+<h1 style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif ; color: aqua;">Climb the ranks.</h1>
+<h1>Rule the trivia arena.</h1>
+<h5 style="margin-top: 75px; font-size: 1.2rem; color: #aaa; font-style: italic;">
+The ultimate multiplayer trivia game where knowledge meets competition
+</h5>
+<a href="signin.html">
+<button type="button">Play Now!</button>
+</a>
+</div>
+<div class="home-media">
+<img src="images/MindBattle.png" alt="Mind Battle Icon"/>
+</div>
+</section>
+
+<section id="about">
+<div style="text-align: center;">
+<h1 style="font-size: 50px;">About the website</h1>
+<p style="font-size: 20px; font-family: cursive; display: inline-block; max-width: 900px; text-align: center;">
+Mind Battle is an intense, knowledge-driven game where players face off in fast-paced quiz duels. 
+</p>
+</div>
+</section>
+
+<section id="features">
+<h1 class="section-title">Game Features</h1>
+<div class="features-grid">
+<div class="feature-card">
+<div class="icon">🧠</div>
+<h3>Real-time Battles</h3>
+<p>Challenge players worldwide in fast-paced 1v1 trivia matches</p>
+</div>
+<div class="feature-card">
+<div class="icon">👥</div>
+<h3>Friend Duels</h3>
+<p>Battle your friends and track your win record against them</p>
+</div>
+<div class="feature-card">
+<div class="icon">📈</div>
+<h3>Progression</h3>
+<p>Earn XP, level up, and climb the seasonal leaderboards</p>
+</div>
+<div class="feature-card coming-soon">
+<div class="coming-soon-label">Coming Soon</div>
+<div class="icon">🏆</div>
+<h3>Live Tournaments</h3>
+<p>Compete in scheduled tournaments with brackets and prizes</p>
+</div>
+<div class="feature-card coming-soon">
+<div class="coming-soon-label">Coming Soon</div>
+<div class="icon">⚡</div>
+<h3>Power-ups</h3>
+<p>Use strategic power-ups to gain an edge in tough matches</p>
+</div>
+<div class="feature-card coming-soon">
+<div class="coming-soon-label">Coming Soon</div>
+<div class="icon">🎖️</div>
+<h3>Achievements</h3>
+<p>Complete challenges to unlock badges and special rewards</p>
+</div>
+</div>
+</section>
+
+<section id="Subjects" style="text-align: center; padding: 50px 20px;">
+<div>
+<h1 style="font-size: 50px; margin-bottom: 20px;">Categories</h1>
+<p style="font-size: 20px; max-width: 1000px; margin: 0 auto; font-family: cursive;">
+Mind Battle covers a wide range of topics to keep every match exciting. <br><br>
+<b>School Subjects:</b> Science & Nature, Science: Computers, Science: Mathematics, Mythology, History, Geography <br><br>
+<b>Core Categories:</b> General Knowledge, Sports, Art, Celebrities, Vehicles <br><br>
+<b>Entertainment Categories:</b> Books, Film, Music, Musicals & Theatres, Television, Video Games, Board Games, Comics, Japanese Anime & Manga, Cartoon & Animations, Gadgets <br><br>
+<b>Fun & Niche Categories:</b> Animals, Famous Quotes, Brands & Logos, Internet & Memes, Food & Drinks <br><br>
+<b>Future Updates:</b> Community-created quizzes, Trending pop culture, Logic & puzzle challenges, Educational packs
+</p>
+</div>
+</section>
+
+<section id="play" style="background-color: darkblue; text-align: center; padding: 50px 20px;">
+<div>
+<h1 style="font-size: 50px; margin-bottom: 20px">Ready to test your knowledge?</h1>
+<p style="font-size: 25px;">Join players in the ultimate mind battle!</p>
+<a href="signin.html">
+<button type="button">Play Now!</button>
+</a>
+</div>
+</section>
+
+<section id="contact" style="background-color:#111; color:#fff; padding:50px 20px; text-align:center;">
+<h1 style="font-size: 50px; margin-bottom: 20px;">Contact Us</h1>
+<p style="font-size: 20px; max-width:800px; margin:0 auto 30px;">
+Have questions, feedback, or ideas? We’d love to hear from you!
+</p>
+<form id="contact-form" style="max-width:600px; margin:0 auto; display:flex; flex-direction:column; gap:15px;">
+<input type="text" name="user_name" placeholder="Your Name" required style="padding:10px; font-size:16px; border-radius:5px; border:none;">
+<input type="email" name="user_email" placeholder="Your Email" required style="padding:10px; font-size:16px; border-radius:5px; border:none;">
+<textarea name="message" placeholder="Your Message" required rows="5" style="padding:10px; font-size:16px; border-radius:5px; border:none;"></textarea>
+<button type="submit" style="padding:12px; font-size:18px; border:none; border-radius:5px; background-color:#00ff99; color:#000; cursor:pointer;">Send Message</button>
+</form>
+<p id="contact-feedback" style="margin-top:20px; font-size:16px; color:#00ff99;"></p>
+</section>
+
+<script src="https://cdn.emailjs.com/dist/email.min.js"></script>
+<script>
+(function(){emailjs.init("G3TBSdzRb1E_hBg7-")})();
+const form=document.getElementById("contact-form");
+const feedback=document.getElementById("contact-feedback");
+form.addEventListener("submit",function(event){
+event.preventDefault();
+emailjs.sendForm('service_9ha7na9','template_xif2lhg',this)
+.then(()=>{feedback.textContent="Thanks for reaching out! We'll get back to you soon.";form.reset();},(err)=>{feedback.textContent="Oops! Something went wrong. Please try again.";console.error("EmailJS error:",err);});
+});
+</script>
+
+<script>
+const preloader = document.getElementById("preloader")
+const canvas = document.getElementById("particles-canvas")
+const ctx = canvas.getContext("2d")
+canvas.width = innerWidth
+canvas.height = innerHeight
+
+const logo = new Image()
+logo.src = "images/MindBattle.png"
+
+const scale = 0.25
+let rotation = 0
+let phase = 0
+let exploded = false
+let particles = []
+
+class Particle {
+  constructor(x, y, c) {
+    this.x = x
+    this.y = y
+    this.vx = (Math.random() - 0.5) * 4
+    this.vy = (Math.random() - 0.5) * 4
+    this.a = 1
+    this.c = c
+  }
+  update() {
+    this.x += this.vx
+    this.y += this.vy
+    this.vx *= 1.05
+    this.vy *= 1.05
+    this.a -= 0.035
+  }
+  draw() {
+    ctx.fillStyle = `rgba(${this.c.r},${this.c.g},${this.c.b},${this.a})`
+    ctx.fillRect(this.x, this.y, 2, 2)
+  }
+}
+
+function explode() {
+  const t = document.createElement("canvas")
+  const tc = t.getContext("2d")
+  t.width = logo.width
+  t.height = logo.height
+  tc.drawImage(logo, 0, 0)
+  const d = tc.getImageData(0, 0, t.width, t.height).data
+  for (let y = 0; y < t.height; y += 7) {
+    for (let x = 0; x < t.width; x += 7) {
+      const i = (y * t.width + x) * 4
+      if (d[i + 3] > 0) {
+        particles.push(new Particle(
+          innerWidth / 2 - logo.width * scale / 2 + x * scale,
+          innerHeight / 2 - logo.height * scale / 2 + y * scale,
+          { r: d[i], g: d[i + 1], b: d[i + 2] }
+        ))
+      }
+    }
+  }
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+  if (!exploded) {
+    if (phase < 3) {
+      // swing: left -> right -> center
+      const t = Date.now() / 300
+      if (phase === 0) rotation = Math.sin(t) * 0.35
+      else if (phase === 1) rotation = Math.sin(t) * 0.2
+      else rotation *= 0.85
+
+      if (phase === 2 && Math.abs(rotation) < 0.01) {
+        rotation = 0
+        explode()
+        exploded = true
+      }
+    }
+
+    ctx.save()
+    ctx.translate(innerWidth / 2, innerHeight / 2)
+    ctx.rotate(rotation)
+    ctx.drawImage(
+      logo,
+      -logo.width * scale / 2,
+      -logo.height * scale / 2,
+      logo.width * scale,
+      logo.height * scale
+    )
+    ctx.restore()
+  } else {
+    particles.forEach((p, i) => {
+      p.update()
+      p.draw()
+      if (p.a <= 0) particles.splice(i, 1)
+    })
+    if (particles.length === 0) {
+      preloader.remove()
+      return
+    }
+  }
+
+  requestAnimationFrame(animate)
+}
+
+logo.onload = () => {
+  animate()
+  let step = 0
+  const swingInterval = setInterval(() => {
+    step++
+    if (step === 1) phase = 1
+    else if (step === 2) phase = 2
+    else clearInterval(swingInterval)
+  }, 500)
+}
+
+addEventListener("resize", () => {
+  canvas.width = innerWidth
+  canvas.height = innerHeight
+})
+</script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js"
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+  authDomain: "mind-battle-32801.firebaseapp.com",
+  projectId: "mind-battle-32801",
+  appId: "1:134995556582:web:1ed2267687a197f1b0e327"
+}
+
+const app = initializeApp(firebaseConfig)
+const auth = getAuth(app)
+
+const loginBtn = document.getElementById("login-btn")
+const signupBtn = document.getElementById("signup-btn")
+const userName = document.getElementById("user-name")
+const logoutBtn = document.getElementById("logout-btn")
+const contactLink = document.querySelector('.nav-links-right a[href="#contact"]')
+
+onAuthStateChanged(auth, user => {
+  if (user) {
+    loginBtn.style.display = "none"
+    signupBtn.style.display = "none"
+    userName.style.display = "block"
+    logoutBtn.style.display = "block"
+    userName.textContent = user.displayName || user.email
+    contactLink.textContent = "Dashboard"
+    contactLink.href = "dashboard.html"
+  } else {
+    loginBtn.style.display = "block"
+    signupBtn.style.display = "block"
+    userName.style.display = "none"
+    logoutBtn.style.display = "none"
+    contactLink.textContent = "Contact Us"
+    contactLink.href = "#contact"
+  }
+})
+
+logoutBtn.addEventListener("click", () => {
+  signOut(auth).then(() => location.reload())
+})
+</script>
+
+<script>
+const navToggle = document.querySelector('.nav-toggle')
+const navLinksLeft = document.querySelector('.nav-links-left')
+const navLinksRight = document.querySelector('.nav-links-right')
+
+navToggle.addEventListener('click', () => {
+  navLinksLeft.classList.toggle('active')
+  navLinksRight.classList.toggle('active')
+})
+
+
+</script>
+
+
+</body>
+</html>

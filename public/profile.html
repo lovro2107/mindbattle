@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Mind Battle — Profile</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root{--bg:#0f0f1c;--card:#141428;--accent:#00ff99;--muted:#9aa0a6;color-scheme: dark}
+    body{font-family:Inter,Arial,sans-serif;background:linear-gradient(135deg,#0f0f20,#1a1a2e);color:#f5f7fa;margin:0;padding:24px}
+    nav{background:rgba(0,0,0,0.35);backdrop-filter:blur(6px);padding:10px 18px;border-radius:10px;margin-bottom:18px}
+    .container{max-width:1000px;margin:0 auto}
+    .profile-grid{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}
+    .card{background:var(--card);padding:20px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.5)}
+    .avatar-large{width:160px;height:160px;border-radius:14px;object-fit:cover;border:3px solid rgba(255,255,255,0.06);display:block;margin:0 auto}
+    h1{margin:0 0 12px 0;font-size:20px;color:var(--accent)}
+    label{display:block;margin-top:10px;font-size:13px;color:var(--muted)}
+    input[type="text"],input[type="email"],input[type="password"]{width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:#0b0b14;color:#fff;margin-top:6px}
+    button{background:linear-gradient(90deg,var(--accent),#00ffaa);border:none;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:700;color:#042;margin-top:10px}
+    .avatars-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:12px}
+    .avatars-grid img{width:100%;aspect-ratio:1/1;object-fit:cover;border-radius:8px;cursor:pointer;border:2px solid transparent}
+    .avatars-grid img.selected{outline:3px solid rgba(0,255,153,0.25);transform:translateY(-3px)}
+    .muted{color:var(--muted);font-size:13px}
+    .danger{background:linear-gradient(90deg,#ff6b6b,#ff3b3b);color:#fff}
+    hr{border-color:#333;margin:16px 0}
+    @media(max-width:780px){.profile-grid{grid-template-columns:1fr;}}
+  </style>
+  <link href="images/avatars/">
+</head>
+<body>
+  <nav class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="display:flex;gap:12px;align-items:center">
+        <img src="images/MindBattle.png" alt="logo" style="height:36px">
+        <strong style="font-size:18px;color:#fff">Mind Battle</strong>
+      </div>
+      <div id="authLinks" style="display:flex;gap:12px;align-items:center">
+        <a id="backDashboard" href="dashboard.html" style="color:var(--accent);text-decoration:none;font-weight:600">Dashboard</a>
+        <button id="signOutBtn" style="display:none;background:none;border:1px solid rgba(255,255,255,0.06);color:#fff;padding:6px 10px;border-radius:8px;cursor:pointer">Sign out</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <div class="profile-grid">
+
+      <div class="card">
+        <h1>Your Profile</h1>
+        <img id="currentAvatar" class="avatar-large" src="images/avatars/avatar1.png" alt="avatar">
+        <p class="muted center" id="emailText" style="text-align:center;margin:6px 0;">—</p>
+        <p class="muted center" id="uidText" style="text-align:center;font-size:12px"></p>
+
+        <label>Choose an avatar</label>
+        <div class="avatars-grid" id="avatarsGrid"></div>
+        <div style="display:flex;gap:10px;margin-top:12px">
+          <button id="saveAvatarBtn">Save Avatar</button>
+          <button id="resetAvatarBtn" style="background:none;border:1px solid rgba(255,255,255,0.04);color:#fff">Reset</button>
+        </div>
+      </div>
+
+
+      <div class="card">
+        <h1>Profile Settings</h1>
+
+        <label>Display Name</label>
+        <input id="displayName" type="text" placeholder="Enter new display name">
+        <button id="saveProfileBtn">Save</button>
+        <small class="muted">You can change your display name once every 7 days.</small>
+
+        <hr>
+
+        <label>Email</label>
+        <input id="emailInput" type="email" placeholder="Enter new email">
+        <input id="reauthPasswordForEmail" type="password" placeholder="Enter password to confirm">
+        <button id="changeEmailBtn">Save</button>
+        <small class="muted">You can change your email once every 30 days.</small>
+
+        <hr>
+
+        <label>Change Password</label>
+        <input id="currentPassword" type="password" placeholder="Current password">
+        <input id="newPassword" type="password" placeholder="New password">
+        <button id="changePasswordBtn" class="danger">Change Password</button>
+
+        <hr>
+
+        <button id="signOutBtn2" style="background:none;border:1px solid rgba(255,255,255,0.06);color:#fff;margin-top:12px">Sign Out</button>
+        <div id="profileStatus" class="muted" style="margin-top:12px;"></div>
+      </div>
+    </div>
+  </main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+import {
+  getAuth,onAuthStateChanged,updateProfile,updateEmail,updatePassword,
+  reauthenticateWithCredential,EmailAuthProvider,signOut
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js";
+import {
+  getFirestore,doc,getDoc,setDoc,updateDoc,serverTimestamp
+} from "https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD8-6fIW9F7vw7NO5p9_hCitfqesLU5f0g",
+  authDomain: "mind-battle-32801.firebaseapp.com",
+  projectId: "mind-battle-32801",
+  storageBucket: "mind-battle-32801.firebasestorage.app",
+  messagingSenderId: "134995556582",
+  appId: "1:134995556582:web:1ed2267687a197f1b0e327"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const AVATARS = [
+  "images/avatar1.png",
+  "images/avatar2.png",
+  "images/avatar3.png",
+  "images/avatar4.png",
+  "images/avatar5.png",
+  "images/avatar6.png",
+  "images/avatar7.png"
+];
+
+
+const displayNameInput=document.getElementById("displayName");
+const emailInput=document.getElementById("emailInput");
+const reauthPasswordForEmail=document.getElementById("reauthPasswordForEmail");
+const changeEmailBtn=document.getElementById("changeEmailBtn");
+const saveProfileBtn=document.getElementById("saveProfileBtn");
+const profileStatus=document.getElementById("profileStatus");
+const emailText=document.getElementById("emailText");
+const uidText=document.getElementById("uidText");
+const currentAvatar=document.getElementById("currentAvatar");
+const avatarsGrid=document.getElementById("avatarsGrid");
+const saveAvatarBtn=document.getElementById("saveAvatarBtn");
+const signOutBtn=document.getElementById("signOutBtn");
+const signOutBtn2=document.getElementById("signOutBtn2");
+const changePasswordBtn=document.getElementById("changePasswordBtn");
+const currentPassword=document.getElementById("currentPassword");
+const newPassword=document.getElementById("newPassword");
+
+let currentUser=null;
+let playerData=null;
+
+function showStatus(msg,ok=true){
+  profileStatus.textContent=msg;
+  profileStatus.style.color=ok?"lightgreen":"#ff8a8a";
+  setTimeout(()=>profileStatus.textContent="",4000);
+}
+
+function renderAvatars() {
+  avatarsGrid.innerHTML = "";
+  AVATARS.forEach(url => {
+    const img = document.createElement("img");
+    img.src = url;
+    img.onclick = () => {
+      document.querySelectorAll(".avatars-grid img").forEach(i=>i.classList.remove("selected"));
+      img.classList.add("selected");
+      currentAvatar.src = url;
+    };
+    avatarsGrid.appendChild(img);
+  });
+}
+
+onAuthStateChanged(auth, async user => {
+  if(!user){window.location.href="signin.html";return;}
+  currentUser=user;
+  uidText.textContent=`UID: ${user.uid}`;
+  emailText.textContent=user.email;
+  displayNameInput.value=user.displayName||"";
+
+  let avatarURL = user.photoURL;
+  if(!avatarURL || avatarURL.includes("127.0.0.1")) {
+    avatarURL = AVATARS[0];
+    await updateProfile(user,{photoURL:avatarURL});
+    await updateDoc(doc(db,"players",user.uid),{photoURL:avatarURL});
+  }
+  currentAvatar.src = avatarURL;
+  renderAvatars();
+
+  const docRef = doc(db,"players",user.uid);
+  const snap = await getDoc(docRef);
+  if(snap.exists()) playerData = snap.data();
+  else{
+    playerData = {username:user.displayName||"Player", lastNameChange:null, lastEmailChange:null};
+    await setDoc(docRef,playerData);
+  }
+
+  signOutBtn.style.display="";
+  signOutBtn2.style.display="";
+});
+
+saveProfileBtn.onclick=async()=>{
+  if(!currentUser) return;
+  const name=(displayNameInput.value||"").trim();
+  if(!name) return showStatus("Enter a name",false);
+  const now=Date.now();
+  const last=playerData?.lastNameChange?.toMillis?.()||0;
+  if(now-last<7*24*60*60*1000){
+    const left=Math.ceil((7*24*60*60*1000-(now-last))/86400000);
+    return showStatus(`You can change again in ${left} day(s)`,false);
+  }
+  try{
+    await updateProfile(currentUser,{displayName:name});
+    await updateDoc(doc(db,"players",currentUser.uid),{username:name,lastNameChange:serverTimestamp()});
+    showStatus("Name updated ✅");
+  }catch(e){showStatus("Error: "+e.message,false);}
+};
+
+changeEmailBtn.onclick=async()=>{
+  if(!currentUser) return;
+  const newEmail=emailInput.value.trim();
+  const pwd=reauthPasswordForEmail.value;
+  if(!newEmail||!pwd) return showStatus("Fill all fields",false);
+  const now=Date.now();
+  const last=playerData?.lastEmailChange?.toMillis?.()||0;
+  if(now-last<30*24*60*60*1000){
+    const left=Math.ceil((30*24*60*60*1000-(now-last))/86400000);
+    return showStatus(`Next email change in ${left} day(s)`,false);
+  }
+  try{
+    const cred=EmailAuthProvider.credential(currentUser.email,pwd);
+    await reauthenticateWithCredential(currentUser,cred);
+    await updateEmail(currentUser,newEmail);
+    await updateDoc(doc(db,"players",currentUser.uid),{email:newEmail,lastEmailChange:serverTimestamp()});
+    showStatus("Email updated ✅");
+    emailText.textContent=newEmail;
+  }catch(e){showStatus("Error: "+e.message,false);}
+};
+
+changePasswordBtn.onclick=async()=>{
+  if(!currentUser) return;
+  const oldPwd=currentPassword.value,newPwd=newPassword.value;
+  if(!oldPwd||!newPwd) return showStatus("Fill all password fields",false);
+  try{
+    const cred=EmailAuthProvider.credential(currentUser.email,oldPwd);
+    await reauthenticateWithCredential(currentUser,cred);
+    await updatePassword(currentUser,newPwd);
+    currentPassword.value="";newPassword.value="";
+    showStatus("Password changed ✅");
+  }catch(e){showStatus("Error: "+e.message,false);}
+};
+
+saveAvatarBtn.onclick=async()=>{
+  if(!currentUser) return;
+  try{
+    await updateProfile(currentUser,{photoURL:currentAvatar.src});
+    await updateDoc(doc(db,"players",currentUser.uid),{photoURL:currentAvatar.src});
+    showStatus("Avatar updated ✅");
+  }catch(e){showStatus("Error: "+e.message,false);}
+};
+
+async function logout(){await signOut(auth);window.location.href="signin.html";}
+signOutBtn.onclick=logout;
+signOutBtn2.onclick=logout;
+</script>
+</body>
+</html>
